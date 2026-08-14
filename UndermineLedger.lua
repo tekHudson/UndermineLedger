@@ -114,6 +114,17 @@ function UL:BuildDebugText()
 			lines[#lines + 1] = "  (none recorded yet)"
 		end
 	end
+
+	lines[#lines + 1] = ""
+	lines[#lines + 1] = "Last LOOT_OPENED trace:"
+	if UL.lastLootTrace and #UL.lastLootTrace > 0 then
+		for _, line in ipairs(UL.lastLootTrace) do
+			lines[#lines + 1] = "  " .. line
+		end
+	else
+		lines[#lines + 1] = "  (no loot window opened yet this session)"
+	end
+
 	return table.concat(lines, "\n")
 end
 

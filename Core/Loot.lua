@@ -7,6 +7,10 @@ right-click while targeted, same assumption other loot-tracking addons
 make). Records against the current instance-group if inside one; otherwise
 checks the boss name against the OpenWorld roster (Azuregos, Kazzak, the
 Dragons of Nightmare, etc.) so open-world uniques still get tracked.
+
+Every run through LOOT_OPENED writes a step-by-step trace into
+UL.lastLootTrace (overwritten each time, not printed anywhere) so a failed
+loot can be diagnosed via the Debug button/window instead of guessing.
 ]]
 
 local ADDON, ns = ...
@@ -23,16 +27,6 @@ local function IsRealLink(link)
 	return name == REAL_ITEM_NAME
 end
 
-local function LootContainsReal()
-	local numItems = GetNumLootItems and GetNumLootItems() or 0
-	for i = 1, numItems do
-		if IsRealLink(GetLootSlotLink(i)) then
-			return true
-		end
-	end
-	return false
-end
-
 local function ResolveOpenWorldBoss(bossName)
 	for _, name in ipairs(ns.Instances.OpenWorld.bosses) do
 		if name == bossName then return true end
@@ -41,17 +35,60 @@ local function ResolveOpenWorldBoss(bossName)
 end
 
 function UL:LOOT_OPENED()
-	if not UL.char then return end
-	if not LootContainsReal() then return end
+	local trace = {}
+	UL.lastLootTrace = trace
+	local function log(...)
+		local parts = {}
+		for i = 1, select("#", ...) do
+			parts[i] = tostring((select(i, ...)))
+		end
+		trace[#trace + 1] = table.concat(parts, " ")
+	end
 
-	local bossName = UnitExists("target") and UnitName("target") or nil
-	if not bossName then return end
+	log("LOOT_OPENED @", date("%H:%M:%S"))
+
+	if not UL.char then
+		log("ABORT: UL.char is nil (DB not initialized yet)")
+		return
+	end
+
+	local numItems = GetNumLootItems and GetNumLootItems() or 0
+	log("GetNumLootItems:", numItems)
+
+	local foundLink
+	for i = 1, numItems do
+		local link = GetLootSlotLink and GetLootSlotLink(i)
+		local _, itemName = GetLootSlotInfo and GetLootSlotInfo(i)
+		log("  slot", i, "name=", itemName, "link=", link)
+		if IsRealLink(link) then
+			foundLink = link
+		end
+	end
+
+	if not foundLink then
+		log("ABORT: no Tarnished Undermine Real (id " .. REAL_ITEM_ID .. ") found in this loot window")
+		return
+	end
+	log("MATCH: Real found -", foundLink)
+
+	local targetExists = UnitExists("target")
+	local bossName = targetExists and UnitName("target") or nil
+	log("target exists:", targetExists, "target name:", bossName)
+	if not bossName then
+		log("ABORT: no current target to attribute the loot to")
+		return
+	end
 
 	local groupKey = UL.currentGroup
+	log("UL.currentGroup:", groupKey, "UL.currentZoneName:", UL.currentZoneName)
 	if not groupKey and ResolveOpenWorldBoss(bossName) then
 		groupKey = "OpenWorld"
+		log("not in a tracked instance, but", bossName, "matched the OpenWorld roster")
 	end
-	if not groupKey then return end
+	if not groupKey then
+		log("ABORT: not in a tracked instance and", bossName, "isn't a known open-world boss")
+		return
+	end
 
 	if groupKey ~= "OpenWorld" then
 		UL:LearnBoss(groupKey, bossName)
@@ -65,6 +102,8 @@ function UL:LOOT_OPENED()
 	rec.lastLoot = time()
 	UL.char.loot[groupKey][bossName] = rec
 	UL:LogLoot(groupKey, bossName)
+
+	log("RECORDED:", bossName, "in", groupKey, "bucket=", bucket, "count=", rec.count)
 
 	if UL.RefreshBossList then UL:RefreshBossList() end
 	if UL.RefreshLedger then UL:RefreshLedger() end
