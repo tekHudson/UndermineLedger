@@ -49,7 +49,7 @@ local function EnsureFrame()
 
 	local historyBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
 	historyBtn:SetSize(80, 20)
-	historyBtn:SetPoint("TOPLEFT", 12, -40)
+	historyBtn:SetPoint("BOTTOMLEFT", 12, 12)
 	historyBtn:SetText("History")
 	historyBtn:SetScript("OnClick", function() UL:ShowHistory() end)
 
@@ -59,9 +59,11 @@ local function EnsureFrame()
 	debugBtn:SetText("Debug")
 	debugBtn:SetScript("OnClick", function() UL:ShowDebug() end)
 
+	-- Scroll area sits between the header and the button row so neither
+	-- overlaps the boss list text.
 	local scroll = CreateFrame("ScrollFrame", "UndermineLedgerScroll", frame, "UIPanelScrollFrameTemplate")
-	scroll:SetPoint("TOPLEFT", 12, -66)
-	scroll:SetPoint("BOTTOMRIGHT", -30, 12)
+	scroll:SetPoint("TOPLEFT", 12, -54)
+	scroll:SetPoint("BOTTOMRIGHT", -30, 40)
 
 	local content = CreateFrame("Frame", nil, scroll)
 	content:SetSize(1, 1)
