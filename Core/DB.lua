@@ -46,9 +46,39 @@ function UL:InitDB()
 
 	UndermineLedgerDB.chars = UndermineLedgerDB.chars or {}
 	local key = CharKey()
-	UndermineLedgerDB.chars[key] = UndermineLedgerDB.chars[key] or { loot = {}, learned = {} }
+	local char = UndermineLedgerDB.chars[key] or {}
+	char.loot = char.loot or {}
+	char.learned = char.learned or {}
+	char.history = char.history or {} -- append-only log; see UL:LogLoot
+	UndermineLedgerDB.chars[key] = char
 	UL.charKey = key
-	UL.char = UndermineLedgerDB.chars[key]
+	UL.char = char
+end
+
+----------------------------------------------------------------------
+-- History (append-only loot log): { ts, group, boss, zone }
+----------------------------------------------------------------------
+local MAX_HISTORY = 500
+
+-- Records one loot event. Distinct from UL.char.loot[group][boss], which
+-- holds current per-boss state (overwritten each loot) for the red/green
+-- check — this is a dated trail of every individual loot, oldest first,
+-- capped so SavedVariables doesn't grow unbounded over months of play.
+function UL:LogLoot(groupKey, bossName)
+	if not UL.char then return end
+	local history = UL.char.history
+	history[#history + 1] = {
+		ts = time(),
+		group = groupKey,
+		boss = bossName,
+		zone = UL.currentZoneName,
+	}
+	local overflow = #history - MAX_HISTORY
+	if overflow > 0 then
+		for i = 1, overflow do
+			table.remove(history, 1)
+		end
+	end
 end
 
 ----------------------------------------------------------------------

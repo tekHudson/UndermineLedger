@@ -83,6 +83,17 @@ function UL:SetupSlash()
 			UL:OpenOptions()
 		elseif msg == "reset" then
 			UL:ResetIconPosition()
+		elseif msg == "history" then
+			local history = UL.char and UL.char.history or {}
+			if #history == 0 then
+				UL:Print("no loot recorded yet.")
+			else
+				UL:Print("last", math.min(10, #history), "of", #history, "loots (", UL.charKey, "):")
+				for i = #history, math.max(1, #history - 9), -1 do
+					local e = history[i]
+					UL:Print(" ", date("%Y-%m-%d %H:%M", e.ts), "-", e.boss, "(" .. e.group .. ")")
+				end
+			end
 		elseif msg == "debug" then
 			UL:Print("zone:", UL.currentZoneName or "(none)", "group:", UL.currentGroup or "(none)")
 			UL:Print("GetQuestResetTime:", GetQuestResetTime and "present" or "MISSING",

@@ -64,6 +64,7 @@ function UL:LOOT_OPENED()
 	rec.count = rec.count + 1
 	rec.lastLoot = time()
 	UL.char.loot[groupKey][bossName] = rec
+	UL:LogLoot(groupKey, bossName)
 
 	if UL.RefreshBossList then UL:RefreshBossList() end
 	if UL.RefreshLedger then UL:RefreshLedger() end
