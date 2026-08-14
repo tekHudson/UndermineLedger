@@ -23,7 +23,7 @@ local function EnsureIcon()
 
 	local tex = icon:CreateTexture(nil, "ARTWORK")
 	tex:SetAllPoints()
-	tex:SetTexture("Interface\\Icons\\INV_Misc_Coin_02")
+	tex:SetTexture(133799)
 	icon.texture = tex
 
 	local border = icon:CreateTexture(nil, "OVERLAY")

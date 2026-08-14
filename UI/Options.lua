@@ -16,7 +16,7 @@ function UL:InitUI()
 		local ldbObject = LDB:NewDataObject(ADDON, {
 			type = "data source",
 			text = "UndermineLedger",
-			icon = "Interface\\Icons\\INV_Misc_Coin_02",
+			icon = 133799,
 			OnClick = function() UL:ToggleLedger() end,
 			OnTooltipShow = function(tooltip)
 				tooltip:AddLine("UndermineLedger")

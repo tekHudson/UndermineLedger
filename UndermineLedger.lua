@@ -83,6 +83,21 @@ function UL:SetupSlash()
 			UL:OpenOptions()
 		elseif msg == "reset" then
 			UL:ResetIconPosition()
+		elseif msg == "debug" then
+			UL:Print("zone:", UL.currentZoneName or "(none)", "group:", UL.currentGroup or "(none)")
+			UL:Print("GetQuestResetTime:", GetQuestResetTime and "present" or "MISSING",
+				"C_DateAndTime.GetSecondsUntilDailyReset:", (C_DateAndTime and C_DateAndTime.GetSecondsUntilDailyReset) and "present" or "MISSING")
+			UL:Print("daily bucket:", ns.CurrentDailyBucket())
+			if UL.currentGroup then
+				local rec = UL.char and UL.char.loot[UL.currentGroup]
+				if rec then
+					for name, r in pairs(rec) do
+						UL:Print(" ", name, "count:", r.count, "recordedBucket:", r.recordedBucket)
+					end
+				else
+					UL:Print("  no loot recorded yet for", UL.currentGroup)
+				end
+			end
 		else
 			UL:ToggleLedger()
 		end

@@ -4,7 +4,7 @@
 ## Author: tek
 ## Version: 0.1.0
 ## DefaultState: enabled
-## IconTexture: Interface\Icons\INV_Misc_Coin_02
+## IconTexture: 133799
 ## X-Curse-Project-ID: TBD
 ## SavedVariables: UndermineLedgerDB
 
