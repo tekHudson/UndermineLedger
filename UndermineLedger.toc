@@ -24,6 +24,7 @@ Core\Zone.lua
 Core\Loot.lua
 
 # UI
+UI\CopyBox.lua
 UI\Icon.lua
 UI\BossList.lua
 UI\Ledger.lua

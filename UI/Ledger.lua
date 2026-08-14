@@ -47,8 +47,20 @@ local function EnsureFrame()
 	close:SetPoint("TOPRIGHT", 0, 0)
 	close:SetScript("OnClick", function() frame:Hide() end)
 
+	local historyBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+	historyBtn:SetSize(80, 20)
+	historyBtn:SetPoint("TOPLEFT", 12, -40)
+	historyBtn:SetText("History")
+	historyBtn:SetScript("OnClick", function() UL:ShowHistory() end)
+
+	local debugBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+	debugBtn:SetSize(80, 20)
+	debugBtn:SetPoint("LEFT", historyBtn, "RIGHT", 6, 0)
+	debugBtn:SetText("Debug")
+	debugBtn:SetScript("OnClick", function() UL:ShowDebug() end)
+
 	local scroll = CreateFrame("ScrollFrame", "UndermineLedgerScroll", frame, "UIPanelScrollFrameTemplate")
-	scroll:SetPoint("TOPLEFT", 12, -54)
+	scroll:SetPoint("TOPLEFT", 12, -66)
 	scroll:SetPoint("BOTTOMRIGHT", -30, 12)
 
 	local content = CreateFrame("Frame", nil, scroll)

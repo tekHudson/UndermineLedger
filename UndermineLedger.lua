@@ -72,7 +72,58 @@ function UL:PLAYER_LOGIN()
 end
 
 ----------------------------------------------------------------------
--- Slash commands
+-- History / Debug — rendered into a copyable window (UI/CopyBox.lua),
+-- never printed to chat. Called from Ledger buttons and the slash
+-- commands below, so both paths land in the same place.
+----------------------------------------------------------------------
+function UL:BuildHistoryText()
+	local history = UL.char and UL.char.history or {}
+	if #history == 0 then
+		return "No loot recorded yet."
+	end
+	local lines = {}
+	for i = #history, 1, -1 do
+		local e = history[i]
+		lines[#lines + 1] = string.format("%s  %s  (%s)", date("%Y-%m-%d %H:%M", e.ts), e.boss, e.group)
+	end
+	return table.concat(lines, "\n")
+end
+
+function UL:ShowHistory()
+	UL:ShowCopyBox("Loot History — " .. (UL.charKey or ""), UL:BuildHistoryText())
+end
+
+function UL:BuildDebugText()
+	local lines = {
+		"Zone: " .. (UL.currentZoneName or "(none)"),
+		"Group: " .. (UL.currentGroup or "(none)"),
+		"GetQuestResetTime: " .. (GetQuestResetTime and "present" or "MISSING"),
+		"C_DateAndTime.GetSecondsUntilDailyReset: "
+			.. ((C_DateAndTime and C_DateAndTime.GetSecondsUntilDailyReset) and "present" or "MISSING"),
+		"Daily bucket: " .. tostring(ns.CurrentDailyBucket()),
+	}
+	if UL.currentGroup then
+		local rec = UL.char and UL.char.loot[UL.currentGroup]
+		lines[#lines + 1] = ""
+		lines[#lines + 1] = "Loot state for " .. UL.currentGroup .. ":"
+		if rec and next(rec) then
+			for name, r in pairs(rec) do
+				lines[#lines + 1] = string.format("  %s  count=%d  recordedBucket=%s", name, r.count, tostring(r.recordedBucket))
+			end
+		else
+			lines[#lines + 1] = "  (none recorded yet)"
+		end
+	end
+	return table.concat(lines, "\n")
+end
+
+function UL:ShowDebug()
+	UL:ShowCopyBox("Debug Info", UL:BuildDebugText())
+end
+
+----------------------------------------------------------------------
+-- Slash commands (everything here is also reachable via UI buttons —
+-- see UI/Ledger.lua's History/Debug buttons and the minimap icon)
 ----------------------------------------------------------------------
 function UL:SetupSlash()
 	SLASH_UNDERMINELEDGER1 = "/undermineledger"
@@ -84,31 +135,9 @@ function UL:SetupSlash()
 		elseif msg == "reset" then
 			UL:ResetIconPosition()
 		elseif msg == "history" then
-			local history = UL.char and UL.char.history or {}
-			if #history == 0 then
-				UL:Print("no loot recorded yet.")
-			else
-				UL:Print("last", math.min(10, #history), "of", #history, "loots (", UL.charKey, "):")
-				for i = #history, math.max(1, #history - 9), -1 do
-					local e = history[i]
-					UL:Print(" ", date("%Y-%m-%d %H:%M", e.ts), "-", e.boss, "(" .. e.group .. ")")
-				end
-			end
+			UL:ShowHistory()
 		elseif msg == "debug" then
-			UL:Print("zone:", UL.currentZoneName or "(none)", "group:", UL.currentGroup or "(none)")
-			UL:Print("GetQuestResetTime:", GetQuestResetTime and "present" or "MISSING",
-				"C_DateAndTime.GetSecondsUntilDailyReset:", (C_DateAndTime and C_DateAndTime.GetSecondsUntilDailyReset) and "present" or "MISSING")
-			UL:Print("daily bucket:", ns.CurrentDailyBucket())
-			if UL.currentGroup then
-				local rec = UL.char and UL.char.loot[UL.currentGroup]
-				if rec then
-					for name, r in pairs(rec) do
-						UL:Print(" ", name, "count:", r.count, "recordedBucket:", r.recordedBucket)
-					end
-				else
-					UL:Print("  no loot recorded yet for", UL.currentGroup)
-				end
-			end
+			UL:ShowDebug()
 		else
 			UL:ToggleLedger()
 		end
