@@ -21,14 +21,17 @@ local function EnsureIcon()
 	icon:RegisterForDrag("LeftButton")
 	icon:SetFrameStrata("MEDIUM")
 
+	-- Icon inset inward, border sized to fully enclose it — reversed before
+	-- (icon filled the whole button, border inset outward), which let the
+	-- round coin art bleed past the square ring.
 	local tex = icon:CreateTexture(nil, "ARTWORK")
-	tex:SetAllPoints()
+	tex:SetPoint("TOPLEFT", 3, -3)
+	tex:SetPoint("BOTTOMRIGHT", -3, 3)
 	tex:SetTexture(133799)
 	icon.texture = tex
 
 	local border = icon:CreateTexture(nil, "OVERLAY")
-	border:SetPoint("TOPLEFT", -2, 2)
-	border:SetPoint("BOTTOMRIGHT", 2, -2)
+	border:SetAllPoints()
 	border:SetTexture("Interface\\Buttons\\UI-Quickslot2")
 	icon.border = border
 
