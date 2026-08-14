@@ -14,25 +14,28 @@ local function EnsureIcon()
 	if icon then return icon end
 
 	icon = CreateFrame("Button", "UndermineLedgerIcon", UIParent)
-	icon:SetSize(32, 32)
+	icon:SetSize(31, 31)
 	icon:SetClampedToScreen(true)
 	icon:SetMovable(true)
 	icon:EnableMouse(true)
 	icon:RegisterForDrag("LeftButton")
 	icon:SetFrameStrata("MEDIUM")
 
-	-- Icon inset inward, border sized to fully enclose it — reversed before
-	-- (icon filled the whole button, border inset outward), which let the
-	-- round coin art bleed past the square ring.
-	local tex = icon:CreateTexture(nil, "ARTWORK")
-	tex:SetPoint("TOPLEFT", 3, -3)
-	tex:SetPoint("BOTTOMRIGHT", -3, 3)
+	-- Same icon/border sizing as PallySquire's minimap button
+	-- (UI/Frame.lua:172-187), a combination already confirmed not to
+	-- overflow: a small icon anchored inside a border texture sized
+	-- larger than the button, rather than trying to inset a fixed-size
+	-- border texture whose own internal art padding isn't known.
+	local tex = icon:CreateTexture(nil, "BACKGROUND")
+	tex:SetSize(20, 20)
+	tex:SetPoint("TOPLEFT", 7, -6)
 	tex:SetTexture(133799)
 	icon.texture = tex
 
 	local border = icon:CreateTexture(nil, "OVERLAY")
-	border:SetAllPoints()
-	border:SetTexture("Interface\\Buttons\\UI-Quickslot2")
+	border:SetSize(53, 53)
+	border:SetPoint("TOPLEFT")
+	border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
 	icon.border = border
 
 	if UL.opt.pos then
