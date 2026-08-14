@@ -1,0 +1,30 @@
+## Interface: 11509
+## Title: UndermineLedger
+## Notes: Tracks daily/weekly Tarnished Undermine Real boss loot across SoD dungeons and raids.
+## Author: tek
+## Version: 0.1.0
+## DefaultState: enabled
+## IconTexture: Interface\Icons\INV_Misc_Coin_02
+## X-Curse-Project-ID: TBD
+## SavedVariables: UndermineLedgerDB
+
+# Libraries
+Libs\LibStub\LibStub.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+
+# Bootstrap (namespace, event dispatch, slash command)
+UndermineLedger.lua
+
+# Core
+Core\Data.lua
+Core\DB.lua
+Core\Reset.lua
+Core\Zone.lua
+Core\Loot.lua
+
+# UI
+UI\Icon.lua
+UI\BossList.lua
+UI\Ledger.lua
+UI\Options.lua
