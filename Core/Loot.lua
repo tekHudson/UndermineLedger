@@ -19,9 +19,15 @@ local UL = ns.UL
 local REAL_ITEM_ID = 226404
 local REAL_ITEM_NAME = "Tarnished Undermine Real"
 
+-- Tarnished Undermine Real may loot as a currency-type slot rather than a
+-- regular item — currency links use the "currency:<id>" hyperlink format
+-- instead of "item:<id>", which the id match needs to catch too. A blank
+-- bracketed display name ("[]") on an otherwise-valid link is also a sign
+-- the client hasn't cached that item/currency's name yet; matching on id
+-- doesn't depend on the name being cached, so it still works either way.
 local function IsRealLink(link)
 	if not link then return false end
-	local id = tonumber(link:match("item:(%d+)"))
+	local id = tonumber(link:match("item:(%d+)") or link:match("currency:(%d+)"))
 	if id == REAL_ITEM_ID then return true end
 	local name = GetItemInfo(link)
 	return name == REAL_ITEM_NAME
@@ -34,15 +40,19 @@ local function ResolveOpenWorldBoss(bossName)
 	return false
 end
 
+local function JoinValues(...)
+	local parts = {}
+	for i = 1, select("#", ...) do
+		parts[i] = tostring((select(i, ...)))
+	end
+	return table.concat(parts, ", ")
+end
+
 function UL:LOOT_OPENED()
 	local trace = {}
 	UL.lastLootTrace = trace
 	local function log(...)
-		local parts = {}
-		for i = 1, select("#", ...) do
-			parts[i] = tostring((select(i, ...)))
-		end
-		trace[#trace + 1] = table.concat(parts, " ")
+		trace[#trace + 1] = JoinValues(...)
 	end
 
 	log("LOOT_OPENED @", date("%H:%M:%S"))
@@ -58,8 +68,8 @@ function UL:LOOT_OPENED()
 	local foundLink
 	for i = 1, numItems do
 		local link = GetLootSlotLink and GetLootSlotLink(i)
-		local _, itemName = GetLootSlotInfo and GetLootSlotInfo(i)
-		log("  slot", i, "name=", itemName, "link=", link)
+		local infoText = GetLootSlotInfo and JoinValues(GetLootSlotInfo(i)) or "(no GetLootSlotInfo)"
+		log("  slot", i, "info=[" .. infoText .. "]", "link=", link)
 		if IsRealLink(link) then
 			foundLink = link
 		end
